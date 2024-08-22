@@ -3647,6 +3647,7 @@ def farmer():
                         waitUntilVisible(browser, By.ID, 'app-host', 30)
                         redeem_goal_title, redeem_goal_price = getRedeemGoal(browser)
                     remainingSearches, remainingSearchesM = getRemainingSearches(browser, separateSearches=True)
+                    POINTS_COUNTER = getBingAccountPoints(browser)
                     if remainingSearchesM != 0:
                         print('[BING]', 'Starting Mobile Bing searches...')
                         Searches(browser, True).bingSearches()
