@@ -2084,6 +2084,10 @@ def completeMorePromotions(browser: WebDriver):
                 completeMorePromotionSearch("braves score")
             elif "Gaming time" in promotionTitle:
                 completeMorePromotionSearch("vampire survivors video game")
+            elif "Expand your vocabulary" in promotionTitle:
+                completeMorePromotionSearch("definition definition")
+            elif "What time is it?" in promotionTitle:
+                completeMorePromotionSearch("china time")
             elif promotion['promotionType'] == "welcometour":
                 completeMorePromotionWelcometour()
             elif promotion['promotionType'] == "urlreward" or promotion['promotionType'] == "":
