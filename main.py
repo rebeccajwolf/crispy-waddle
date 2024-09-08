@@ -184,7 +184,10 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     prefs = {"profile.default_content_setting_values.geolocation" :2,
                     "profile.default_content_setting_values.notifications": 2,
                     "credentials_enable_service": False,
-                    "profile.password_manager_enabled": False}
+                    "profile.password_manager_enabled": False
+                    "webrtc.ip_handling_policy": "disable_non_proxied_udp",
+                    "webrtc.multiple_routes_enabled": False,
+                    "webrtc.nonproxied_udp_enabled": False}             
     if ARGS.no_images:
         prefs["profile.managed_default_content_settings.images"] = 2
     if ARGS.account_browser:
@@ -212,9 +215,11 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
                 prYellow(
                     "[PROXY] Your entered proxy is not working, continuing without proxy.")
     options.add_experimental_option("prefs", prefs)
-
+    options.add_experimental_option("useAutomationExtension", False)
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.headless = True if ARGS.headless and ARGS.account_browser is None else False
     options.add_argument("--log-level=3")
+    options.add_argument("--start-maximized")
     options.add_argument("--blink-settings=imagesEnabled=false")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--ignore-certificate-errors-spki-list")
@@ -225,6 +230,7 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     options.add_argument("--disable-default-apps")
     options.add_argument("--disable-features=Translate")
     options.add_argument('--disable-features=PrivacySandboxSettings4')
+    options.add_argument("--disable-search-engine-choice-screen")
     if platform.system() == 'Linux':
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -232,7 +238,8 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
         browser = edgedriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()), options=options)
     else:
         # browser = uc.Chrome(driver_executable_path="chromedriver", options=options, use_subprocess=False, user_data_dir= user_data if ARGS.session or ARGS.account_browser else None, no_sandbox=False)
-        browser = uc.Chrome(driver_executable_path="chromedriver.exe", options=options, use_subprocess=False, user_data_dir= user_data if ARGS.session or ARGS.account_browser else None, no_sandbox=False)
+        # browser = uc.Chrome(driver_executable_path="chromedriver.exe", options=options, use_subprocess=False, user_data_dir= user_data if ARGS.session or ARGS.account_browser else None, no_sandbox=False)
+        browser = webdriver.Chrome(service=Service("chromedriver"), options=options)
     return browser
 
 
@@ -2493,36 +2500,32 @@ class RemainingSearches(NamedTuple):
 
 def getRemainingSearches(browser: WebDriver,separateSearches: bool = False, desktopAndMobile: bool = False, isMobile: bool = False) -> RemainingSearches | int:
     """get remaining searches"""
-    dashboard = getDashboardData(browser)
+    bingInfo = getBingInfo(browser)
     searchPoints = 1
-    counters = dashboard['userStatus']['counters']
-    if not 'pcSearch' in counters:
-        return 0, 0
-    progressDesktop = counters["pcSearch"][0]["pointProgress"]
-    targetDesktop = counters["pcSearch"][0]["pointProgressMax"]
-    if len(counters["pcSearch"]) >= 2:
-        progressDesktop = progressDesktop + counters["pcSearch"][1]["pointProgress"]
-        targetDesktop = targetDesktop + counters["pcSearch"][1]["pointProgressMax"]
-    if targetDesktop in [30, 90, 102]:
-        # Level 1 or 2 EU/South America
+    counters = bingInfo["flyoutResult"]["userStatus"]["counters"]
+    pcSearch: dict = counters["PCSearch"][0]
+    mobileSearch: dict = counters["MobileSearch"][0]
+    pointProgressMax: int = pcSearch["pointProgressMax"]
+
+    searchPoints: int
+    if pointProgressMax in [30, 90, 102]:
         searchPoints = 3
-    elif targetDesktop == 50 or targetDesktop >= 170 or targetDesktop == 150:
-        # Level 1 or 2 US
+    elif pointProgressMax in [50, 150] or pointProgressMax >= 170:
         searchPoints = 5
-    remainingDesktop = int((targetDesktop - progressDesktop) / searchPoints)
-    remainingMobile = 0
-    if dashboard["userStatus"]["levelInfo"]["activeLevel"] != "Level1":
-        progressMobile = counters["mobileSearch"][0]["pointProgress"]
-        targetMobile = counters["mobileSearch"][0]["pointProgressMax"]
-        remainingMobile = int((targetMobile - progressMobile) / searchPoints)
+    pcPointsRemaining = pcSearch["pointProgressMax"] - pcSearch["pointProgress"]
+    assert pcPointsRemaining % searchPoints == 0
+    remainingDesktopSearches: int = int(pcPointsRemaining / searchPoints)
+    mobilePointsRemaining = mobileSearch["pointProgressMax"] - mobileSearch["pointProgress"]
+    assert mobilePointsRemaining % searchPoints == 0
+    remainingMobileSearches: int = int(mobilePointsRemaining / searchPoints)
     if separateSearches:
-        return remainingDesktop, remainingMobile
+        return remainingDesktopSearches, remainingMobileSearches
     elif desktopAndMobile:
-            return RemainingSearches(desktop=remainingDesktop, mobile=remainingMobile).getTotal()
+            return RemainingSearches(desktop=remainingDesktopSearches, mobile=remainingMobileSearches).getTotal()
     elif isMobile:
-            return remainingMobile
+            return remainingMobileSearches
     elif not isMobile:
-        return remainingDesktop
+        return remainingDesktopSearches
 
 def getRemainingSearchesv2(browser: WebDriver):
     """get remaining searches"""
@@ -3578,7 +3581,7 @@ def farmer():
                 updateLogs()
             prYellow('********************' + hide_email(CURRENT_ACCOUNT) + '********************')
             if not LOGS[CURRENT_ACCOUNT]['PC searches']:
-                with browserSetupv3(False, account.get('proxy', None)) as browser:
+                with browserSetup(False, account.get('proxy', None)) as browser:
                     print('[LOGIN]', 'Logging-in...')
                     login(browser, account['username'], account['password'], account.get(
                         'totpSecret', None))
@@ -3638,7 +3641,7 @@ def farmer():
                 browser.close()
                 browser.quit()
 
-                with browserSetupv3(True, account.get('proxy', None)) as browser:
+                with browserSetup(True, account.get('proxy', None)) as browser:
                     print('[LOGIN]', 'Logging-in mobile...')
                     login(browser, account['username'], account['password'], account.get(
                         'totpSecret', None), True)
