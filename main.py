@@ -121,7 +121,7 @@ def downloadWebDriver():
 def createDisplay():
     """Create Display"""
     try:
-        display = Display(visible=False, size=(1920, 1080))
+        display = Display(visible=False, size=(900, 800))
         display.start()
     except Exception as exc:  # skipcq
         prYellow("Virtual Display Failed!")
@@ -171,14 +171,16 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     """Create Chrome browser"""
     user_agent = GenerateUserAgent().userAgent(browserConfig={}, mobile=isMobile)[0]
     from selenium.webdriver.edge.options import Options as EdgeOptions
+    from selenium.webdriver.chrome.options import Options as ChromeOptions
     if ARGS.edge:
         options = EdgeOptions()
     else:
-        options = uc.ChromeOptions()
-    if not isMobile:
-        user_data = f'--user-data-dir={Path(__file__).parent}/Profiles/{CURRENT_ACCOUNT}/PC'
-    else:
-        user_data = f'--user-data-dir={Path(__file__).parent}/Profiles/{CURRENT_ACCOUNT}/Mobile'
+        options = ChromeOptions()
+    if ARGS.session or ARGS.account_browser:
+        if not isMobile:
+            user_data = f'--user-data-dir={Path(__file__).parent}/Profiles/{CURRENT_ACCOUNT}/PC'
+        else:
+            user_data = f'--user-data-dir={Path(__file__).parent}/Profiles/{CURRENT_ACCOUNT}/Mobile'
     options.add_argument("--user-agent=" + user_agent)
     options.add_argument('--lang=' + LANG.split("-")[0])
     prefs = {"profile.default_content_setting_values.geolocation" :2,
@@ -217,7 +219,8 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     options.add_experimental_option("prefs", prefs)
     options.add_experimental_option("useAutomationExtension", False)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.headless = True if ARGS.headless and ARGS.account_browser is None else False
+    if ARGS.headless and ARGS.account_browser is None:
+        options.add_argument("--headless=new")
     options.add_argument("--log-level=3")
     options.add_argument("--start-maximized")
     options.add_argument("--blink-settings=imagesEnabled=false")
@@ -239,7 +242,7 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     else:
         # browser = uc.Chrome(driver_executable_path="chromedriver", options=options, use_subprocess=False, user_data_dir= user_data if ARGS.session or ARGS.account_browser else None, no_sandbox=False)
         # browser = uc.Chrome(driver_executable_path="chromedriver.exe", options=options, use_subprocess=False, user_data_dir= user_data if ARGS.session or ARGS.account_browser else None, no_sandbox=False)
-        browser = webdriver.Chrome(service=Service("chromedriver"), options=options)
+        browser = webdriver.Chrome(service=ChromeService("chromedriver"), options=options)
     return browser
 
 
