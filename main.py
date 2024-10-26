@@ -234,6 +234,8 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     options.add_argument("--disable-features=Translate")
     options.add_argument('--disable-features=PrivacySandboxSettings4')
     options.add_argument("--disable-search-engine-choice-screen")
+    options.add_argument("--disable-http2")
+    options.page_load_strategy = 'eager'
     if platform.system() == 'Linux':
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -2032,6 +2034,30 @@ def completeMorePromotions(browser: WebDriver):
             time.sleep(3)
     except:
         pass
+    
+    ACTIVITY_TITLE_TO_SEARCH = {
+    "Discover open job roles": "walmart open job roles",
+    "Expand your vocabulary": "define demure",
+    "Find places to stay": "hotels rome italy",
+    "Find somewhere new to explore": "directions to new york",
+    "Gaming time": "vampire survivors video game",
+    "Get your shopping done faster": "new iphone",
+    "Houses near you": "apartments manhattan",
+    "How's the economy?": "sp 500",
+    "Learn to cook a new recipe": "how cook pierogi",
+    "Let's watch that movie again!": "aliens movie",
+    "Plan a quick getaway": "flights nyc to paris",
+    "Prepare for the weather": "weather tomorrow",
+    "Quickly convert your money": "convert 374 usd to yen",
+    "Search the lyrics of a song": "black sabbath supernaut lyrics",
+    "Stay on top of the elections": "election news latest",
+    "Too tired to cook tonight?": "Pizza Hut near me",
+    "Translate anything": "translate pencil sharpener to spanish",
+    "What time is it?": "china time",
+    "Who won?": "braves score",
+    "You can track your package": "usps tracking",
+    }
+    
     # i = 0
     for promotion in morePromotions:
         try:
@@ -2060,44 +2086,50 @@ def completeMorePromotions(browser: WebDriver):
                 if isElementExists(browser, By.XPATH, '//*[@id="modal-host"]/div[2]/button'):
                     browser.find_element(By.XPATH, '//*[@id="modal-host"]/div[2]/button').click()
                     continue
-            if "Search the lyrics of a song" in promotionTitle:
-                completeMorePromotionSearch("black sabbath supernaut lyrics")
-            elif "Get your shopping done faster" in promotionTitle:
-                completeMorePromotionSearch("shop mobile phone")
-            elif "Let's watch that movie again!" in promotionTitle:
-                completeMorePromotionSearch("godfather 2")
-            elif "Translate anything" in promotionTitle:
-                completeMorePromotionSearch("translate pencil sharpener to spanish")
-            elif "Discover open job roles" in promotionTitle:
-                completeMorePromotionSearch("walmart open job roles")
-            elif "Plan a quick getaway" in promotionTitle:
-                completeMorePromotionSearch("flights nyc to paris")
-            elif "You can track your package" in promotionTitle:
-                completeMorePromotionSearch("usps tracking")
-                # bar = browser.execute_script('reutrn document.getElementsByClassName("tracking_Number_Input")[0].children[1]')
-                # bar.click()
-            elif "Find somewhere new to explore" in promotionTitle:
-                completeMorePromotionSearch("directions to new york")
-            elif "Too tired to cook tonight?" in promotionTitle:
-                completeMorePromotionSearch("Pizza Hut near me")
-            elif "Prepare for the weather​" in promotionTitle:
-                completeMorePromotionSearch("upcoming weather")
-            elif "Quickly convert your money" in promotionTitle:
-                completeMorePromotionSearch("convert 374 usd to yen")
-            elif "Learn to cook a new recipe" in promotionTitle:
-                completeMorePromotionSearch("how cook pierogi")
-            elif "Find places to stay" in promotionTitle:
-                completeMorePromotionSearch("hotels rome italy")
-            elif "How's the economy?" in promotionTitle:
-                completeMorePromotionSearch("sp 500")
-            elif "Who won?" in promotionTitle:
-                completeMorePromotionSearch("braves score")
-            elif "Gaming time" in promotionTitle:
-                completeMorePromotionSearch("vampire survivors video game")
-            elif "Expand your vocabulary" in promotionTitle:
-                completeMorePromotionSearch("definition definition")
-            elif "What time is it?" in promotionTitle:
-                completeMorePromotionSearch("china time")
+            if promotionTitle in ACTIVITY_TITLE_TO_SEARCH:
+                completeMorePromotionSearch(ACTIVITY_TITLE_TO_SEARCH[promotionTitle])
+            # if "Search the lyrics of a song" in promotionTitle:
+                # completeMorePromotionSearch("black sabbath supernaut lyrics")
+            # elif "Get your shopping done faster" in promotionTitle:
+                # completeMorePromotionSearch("chicken tenders")
+            # elif "Let's watch that movie again!" in promotionTitle:
+                # completeMorePromotionSearch("godfather 2")
+            # elif "Translate anything" in promotionTitle:
+                # completeMorePromotionSearch("translate pencil sharpener to spanish")
+            # elif "Discover open job roles" in promotionTitle:
+                # completeMorePromotionSearch("walmart open job roles")
+            # elif "Plan a quick getaway" in promotionTitle:
+                # completeMorePromotionSearch("flights nyc to paris")
+            # elif "You can track your package" in promotionTitle:
+                # completeMorePromotionSearch("usps tracking")
+                # # bar = browser.execute_script('reutrn document.getElementsByClassName("tracking_Number_Input")[0].children[1]')
+                # # bar.click()
+            # elif "Find somewhere new to explore" in promotionTitle:
+                # completeMorePromotionSearch("directions to new york")
+            # elif "Too tired to cook tonight?" in promotionTitle:
+                # completeMorePromotionSearch("Pizza Hut near me")
+            # elif "Prepare for the weather​" in promotionTitle:
+                # completeMorePromotionSearch("weather tomorrow")
+            # elif "Quickly convert your money" in promotionTitle:
+                # completeMorePromotionSearch("convert 374 usd to yen")
+            # elif "Learn to cook a new recipe" in promotionTitle:
+                # completeMorePromotionSearch("how cook pierogi")
+            # elif "Find places to stay" in promotionTitle:
+                # completeMorePromotionSearch("hotels rome italy")
+            # elif "How's the economy?" in promotionTitle:
+                # completeMorePromotionSearch("sp 500")
+            # elif "Who won?" in promotionTitle:
+                # completeMorePromotionSearch("braves score")
+            # elif "Gaming time" in promotionTitle:
+                # completeMorePromotionSearch("vampire survivors video game")
+            # elif "Expand your vocabulary" in promotionTitle:
+                # completeMorePromotionSearch("define polymorphism")
+            # elif "What time is it?" in promotionTitle:
+                # completeMorePromotionSearch("china time")
+            # elif "Houses near you" in promotionTitle:
+                # completeMorePromotionSearch("apartments manhattan")
+            # elif "Stay on top of the elections" in promotionTitle:
+                # completeMorePromotionSearch("election news latest")
             elif promotion['promotionType'] == "welcometour":
                 completeMorePromotionWelcometour()
             elif promotion['promotionType'] == "urlreward" or promotion['promotionType'] == "":
