@@ -186,7 +186,7 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     prefs = {"profile.default_content_setting_values.geolocation" :2,
                     "profile.default_content_setting_values.notifications": 2,
                     "credentials_enable_service": False,
-                    "profile.password_manager_enabled": False
+                    "profile.password_manager_enabled": False,
                     "webrtc.ip_handling_policy": "disable_non_proxied_udp",
                     "webrtc.multiple_routes_enabled": False,
                     "webrtc.nonproxied_udp_enabled": False}             
