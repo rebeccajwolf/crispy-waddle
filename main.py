@@ -169,7 +169,7 @@ def retry_on_500_errors(function):
 
 def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     """Create Chrome browser"""
-    user_agent = GenerateUserAgent().userAgent(browserConfig={}, mobile=isMobile)[0]
+    user_agent = GenerateUserAgent().userAgent(browserConfig=None, mobile=isMobile)[0]
     from selenium.webdriver.edge.options import Options as EdgeOptions
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     if ARGS.edge:
