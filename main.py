@@ -235,7 +235,7 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     options.add_argument('--disable-features=PrivacySandboxSettings4')
     options.add_argument("--disable-search-engine-choice-screen")
     options.add_argument("--disable-http2")
-    # options.page_load_strategy = 'eager'
+    options.page_load_strategy = 'eager'
     if platform.system() == 'Linux':
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -744,7 +744,7 @@ def checkRewardsLogin(browser: WebDriver):
     handleFirstVisit(browser)
 
 
-# @func_set_timeout(300)
+@func_set_timeout(300)
 def checkBingLogin(browser: WebDriver, isMobile: bool = False):
     """Check if logged in to Bing"""
     goToURL(browser, 'https://www.bing.com/fd/auth/signin?action=interactive&provider=windows_live_id&return_url=https%3A%2F%2Fwww.bing.com%2F')
