@@ -234,8 +234,8 @@ def browserSetup(isMobile: bool = False, proxy: str = None) -> WebDriver:
     options.add_argument("--disable-features=Translate")
     options.add_argument('--disable-features=PrivacySandboxSettings4')
     options.add_argument("--disable-search-engine-choice-screen")
-    options.add_argument("--disable-http2")
-    options.page_load_strategy = 'eager'
+    # options.add_argument("--disable-http2")
+    # options.page_load_strategy = 'eager'
     if platform.system() == 'Linux':
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
